@@ -1,3 +1,33 @@
+# Testing (on external image, for cuda 10.2)
+
+Installation
+```
+conda create -n IA_LUT3D python=3.8
+conda activate IA_LUT3D
+conda install pytorch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0 cudatoolkit=10.2 -c pytorch
+pip3 install opencv-python tqdm
+
+# Install trilinear cpp (pytorch 1.x)
+cd trilinear_cpp
+export CUDA_HOME=PATH_TO_CUDA_LIB e.g. /data2/shaun/cuda-10.2
+python3 setup.py install
+```
+
+Running (Ensure in Image-Adaptive-3DLUT folder)
+```
+usage: demo_3dlut.py [-h] --input_dir INPUT_DIR --output_dir OUTPUT_DIR [--device DEVICE] [--unpaired]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --input_dir INPUT_DIR
+                        Path to input folder containing images
+  --output_dir OUTPUT_DIR
+                        Path to output folder
+  --device DEVICE       Device to use e.g. 'cuda:0', 'cuda:1', 'cpu'
+  --unpaired            Evaluate model trained with unpaired data
+```
+
+
 # Image-Adaptive-3DLUT
 Learning Image-adaptive 3D Lookup Tables for High Performance Photo Enhancement in Real-time
 
