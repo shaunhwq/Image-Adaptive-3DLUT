@@ -114,7 +114,8 @@ if __name__ == "__main__":
 
     # Model inference
     with torch.no_grad():
-        for img_path in tqdm(image_paths, total=len(image_paths), desc="Running 3D-LUT..."):
+        description = "Running 3D-LUT..." if not args.unpaired else "Running 3D-LUT(unpaired)..."
+        for img_path in tqdm(image_paths, total=len(image_paths), desc=description):
             in_image = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
             model_input = pre_process(in_image, args.device)
 
