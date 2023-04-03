@@ -500,3 +500,71 @@ class ImageDataset_HDRplus_unpaired(Dataset):
             return len(self.set1_input_files)
         elif self.mode == "test":
             return len(self.test_input_files)
+
+
+class DistortionDataset(Dataset):
+    def __init__(self, root, split, distortion_transforms, transform=None):
+        super().__init__()
+        self.transform = transform
+        self.distortion_transforms = distortion_transforms
+
+        train_percentage = 0.8
+
+        self.image_paths = [os.path.join(root, image_path) for image_path in os.listdir(root) if image_path[0] != "."]
+
+        # Split into train & test sets
+        if split == "train":
+            self.input_images = self.image_paths[:int(train_percentage * len(self.image_paths))]
+        elif split == "test":
+            self.input_images = self.image_paths[int(train_percentage * len(self.image_paths)):]
+        else:
+            raise NotImplementedError(f"split: {split} is not implemented")
+
+    def __len__(self):
+        return len(self.input_images)
+
+    def __getitem__(self, idx):
+        source_path = self.input_images[idx]
+        source_img = cv2.imread(source_path)
+        inputs, target = [source_img], source_img
+        inputs, target = self.distortion_transforms(inputs, target)
+
+        if self.transform is not None:
+            inputs, target = self.transform(inputs, target)
+
+        return inputs, target
+
+
+def get_distortion_dataset(dataset_root: str,
+                           batch_size: int,
+                           num_workers: int,
+                           distortion_transform,
+                           train_transforms: transforms.Compose = None,
+                           test_transforms: transforms.Compose = None,
+                           ):
+    train_loader = torch.utils.data.DataLoader(
+        dataset=DistortionDataset(
+            root=dataset_root,
+            split="train",
+            distortion_transforms=distortion_transform,
+            transform=train_transforms
+        ),
+        batch_size=batch_size,
+        num_workers=num_workers,
+        shuffle=True,
+        pin_memory=True,
+    )
+
+    test_loader = torch.utils.data.DataLoader(
+        dataset=DistortionDataset(
+            root=dataset_root,
+            split="test",
+            distortion_transforms=distortion_transform,
+            transform=test_transforms
+        ),
+        batch_size=batch_size,
+        num_workers=num_workers,
+        shuffle=False,
+    )
+
+    return train_loader, test_loader
